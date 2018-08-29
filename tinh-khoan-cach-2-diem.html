@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Google Maps JavaScript API</title>
+  </head>
+ 
+  <body>
+ 
+    <form action="#" onsubmit="showLocation(); return false;">
+      <p>
+        <input type="text" name="address1" value="165 Duong Quang Ham" class="address_input" size="40" />
+        <input type="text" name="address2" value="236 Hoàng Quốc Việt" class="address_input" size="40" />
+        <input type="submit" name="find" value="Search" />
+      </p>
+    </form>
+    <p id="results"></p>
+
+
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places&key=AIzaSyBk9cZHRjUGsqtVOdguMoSkk9KC9DrCPyw"></script>
+ 
+     <!-- <script src="https://maps.googleapis.com/maps?file=api&v=2&v=3.exp&sensor=false&libraries=places&key=AIzaSyBk9cZHRjUGsqtVOdguMoSkk9KC9DrCPyw"></script> -->
+ 
+    <script language="javascript">
+      var geocoder, location1, location2;
+
+      function initialize() {
+          geocoder = new google.maps.Geocoder;
+      }
+
+      function showLocation() {
+        var geocoder = new google.maps.Geocoder;
+        var adr = document.forms[0].address1.value;
+        var adr2 = document.forms[0].address2.value;
+        geocoder.geocode({address: adr}, function (response) {
+            var pos = response[0].geometry.location;
+            location1 = {
+              lat: pos.lat().toFixed(6), 
+              lon: pos.lng().toFixed(6), 
+              address: response[0].formatted_address
+            };
+        });
+
+        geocoder.geocode({address: adr2}, function (response) {
+            var pos = response[0].geometry.location;
+              location2 = {
+                lat: pos.lat().toFixed(6), 
+                lon: pos.lng().toFixed(6), 
+                address: response[0].formatted_address
+              };
+            calculateDistance();
+        });
+    }
+
+    function calculateDistance()
+      {
+        try
+          {
+              var glatlng1 = new google.maps.LatLng(location1.lat, location1.lon);
+              console.log(glatlng1);
+              var glatlng2 = new google.maps.LatLng(location2.lat, location2.lon);
+              var miledistance = glatlng1.distanceFrom(glatlng2, 3959).toFixed(1);
+              var kmdistance = (miledistance * 1.609344).toFixed(1);
+   
+              document.getElementById('results').innerHTML = '<strong>Địa chỉ 1: </strong>' + location1.address + '<br /><strong>Địa chỉ 2: </strong>' + location2.address + '<br /><strong>Khoảng cánh: </strong>' + miledistance + ' miles (or ' + kmdistance + ' km)';
+          }
+          catch (error)
+          {
+              alert(error);
+          }
+      }
+
+      google.maps.event.addDomListener(window, 'load', initialize);
+      google.maps.LatLng.prototype.distanceFrom = function(newLatLng) {
+      // setup our variables
+       var lat1 = this.lat();
+       var radianLat1 = lat1 * ( Math.PI  / 180 );
+       var lng1 = this.lng();
+       var radianLng1 = lng1 * ( Math.PI  / 180 );
+       var lat2 = newLatLng.lat();
+       var radianLat2 = lat2 * ( Math.PI  / 180 );
+       var lng2 = newLatLng.lng();
+       var radianLng2 = lng2 * ( Math.PI  / 180 );
+       // sort out the radius, MILES or KM?
+       var earth_radius = 3959; // (km = 6378.1) OR (miles = 3959) - radius of the earth
+     
+       // sort our the differences
+       var diffLat =  ( radianLat1 - radianLat2 );
+       var diffLng =  ( radianLng1 - radianLng2 );
+       // put on a wave (hey the earth is round after all)
+       var sinLat = Math.sin( diffLat / 2  );
+       var sinLng = Math.sin( diffLng / 2  ); 
+     
+       // maths - borrowed from http://www.opensourceconnections.com/wp-content/uploads/2009/02/clientsidehaversinecalculation.html
+       var a = Math.pow(sinLat, 2.0) + Math.cos(radianLat1) * Math.cos(radianLat2) * Math.pow(sinLng, 2.0);
+     
+       // work out the distance
+       var distance = earth_radius * 2 * Math.asin(Math.min(1, Math.sqrt(a)));
+     
+       // return the distance
+       return distance;
+    }
+    </script>
+
+  </body>
+</html>
